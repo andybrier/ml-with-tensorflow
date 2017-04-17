@@ -1,3 +1,4 @@
+#encoding=utf-8
 import numpy as np
 import tensorflow as tf
 
@@ -11,13 +12,12 @@ actual_b = 7
 learn_rate = 0.001
 log_file = "/tmp/feature_2_batch_1000"
 
+# ******************* 模型构建******************
 # Model linear regression y = Wx + b
 x = tf.placeholder(tf.float32, [None, 2], name="x")
-W = tf.Variable(tf.zeros([2,1]), name="W")
+W = tf.Variable(tf.zeros([2, 1]), name="W")
 b = tf.Variable(tf.zeros([1]), name="b")
-with tf.name_scope("Wx_b") as scope:
-    product = tf.matmul(x,W)
-    y = product + b
+y = tf.matmul(x, W) + b
 
 # Add summary ops to collect data
 W_hist = tf.summary.histogram("weights", W)
@@ -28,18 +28,21 @@ y_ = tf.placeholder(tf.float32, [None, 1])
 
 # Cost function sum((y_-y)**2)
 with tf.name_scope("cost") as scope:
-    cost = tf.reduce_sum(tf.pow(y-y_, 2))/ (2 * datapoint_size)
+    cost = tf.reduce_sum(tf.pow(y-y_, 2))/(2 * datapoint_size)
 
 # Training using Gradient Descent to minimize cost
 with tf.name_scope("train") as scope:
     train_step = tf.train.GradientDescentOptimizer(learn_rate).minimize(cost)
 
+# ******************* End 模型构建******************
+
+#  ********  生成测试数据集合*******
 all_xs = []
 all_ys = []
 for i in range(datapoint_size):
     # Create fake data for y = 2.x_1 + 5.x_2 + 7
-    x_1 = i%10
-    x_2 = np.random.randint(datapoint_size/2)%10
+    x_1 = i % 10
+    x_2 = np.random.randint(datapoint_size/2) % 10
     y = actual_W1 * x_1 + actual_W2 * x_2 + actual_b
     # Create fake data for y = W.x + b where W = [2, 5], b = 7
     all_xs.append([x_1, x_2])
@@ -47,6 +50,9 @@ for i in range(datapoint_size):
 
 all_xs = np.array(all_xs)
 all_ys = np.transpose([all_ys])
+
+#  ******** End 生成测试数据集合*******
+
 
 sess = tf.Session()
 
